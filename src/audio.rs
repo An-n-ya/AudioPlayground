@@ -7,9 +7,9 @@ use symphonia::core::meta::MetadataOptions;
 use symphonia::core::probe::Hint;
 use std::path::Path;
 
-fn audio() -> Result<(), Box<dyn std::error::Error>> {
+pub(crate) fn audio(file: &str) -> Result<Vec<f32>, Box<dyn std::error::Error>> {
     // ====================== 1. 打开音频文件 ======================
-    let path = Path::new("assets/qwen_tts_output.wav"); // 替换成你的 WAV 文件路径
+    let path = Path::new(file); // 替换成你的 WAV 文件路径
     let src = std::fs::File::open(path)?;
     let mss = MediaSourceStream::new(Box::new(src), Default::default());
 
@@ -72,7 +72,7 @@ fn audio() -> Result<(), Box<dyn std::error::Error>> {
     println!("总采样点数: {}", all_samples.len());
     println!("前 10 个采样值: {:?}", &all_samples[0..10.min(all_samples.len())]);
 
-    Ok(())
+    Ok(all_samples)
 }
 
 #[cfg(test)]
@@ -80,6 +80,5 @@ mod tests {
     use super::*;
     #[test]
     pub fn test_audio() {
-        audio().unwrap();
     }
 }

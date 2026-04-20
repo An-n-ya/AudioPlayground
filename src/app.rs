@@ -1,8 +1,9 @@
 use egui::{Pos2, frame};
+use symphonia::core::audio::AudioBuffer;
 
 use crate::{
     SinSignal,
-    wave::{self, SAMPLE_LENGTH, WaveViewer},
+    wave::{self, SAMPLE_LENGTH, WaveViewer}, waveform_display::{AudioHandle, WaveformDisplay},
 };
 
 /// We derive Deserialize/Serialize so we can persist app state on shutdown.
@@ -12,6 +13,7 @@ pub struct App {
     wave1: SinSignal,
     wave2: SinSignal,
     wave3: SinSignal,
+    audio: AudioHandle
 }
 
 impl Default for App {
@@ -20,6 +22,7 @@ impl Default for App {
             wave1: Default::default(),
             wave2: Default::default(),
             wave3: Default::default(),
+            audio: AudioHandle::new("assets/qwen_tts_output.wav".into())
         }
     }
 }
@@ -72,33 +75,36 @@ impl eframe::App for App {
 
         egui::CentralPanel::default().show_inside(ui, |ui| {
             // The central panel the region left after adding TopPanel's and SidePanel's
-            ui.heading("sin wave drawing");
+            // ui.heading("sin wave drawing");
+            //
+            // ui.horizontal(|ui| {
+            //     ui.label("Write something: ");
+            // });
+            //
+            // let mut points = self.wave1.points();
+            // let points2 = self.wave2.points();
+            // let points3 = self.wave3.points();
+            // for i in 0..SAMPLE_LENGTH {
+            //     points[i] = Pos2::new(
+            //         points[i].x + points2[i].x + points3[i].x,
+            //         points[i].y + points2[i].y + points3[i].y,
+            //     );
+            // }
+            //
+            // WaveViewer::new(points, 3.0).ui(ui, frame);
+            // ui.separator();
+            //
+            // self.wave1.ui(ui, frame);
+            // ui.separator();
+            //
+            // self.wave2.ui(ui, frame);
+            // ui.separator();
+            //
+            // self.wave3.ui(ui, frame);
+            // ui.separator();
+            //
 
-            ui.horizontal(|ui| {
-                ui.label("Write something: ");
-            });
-
-            let mut points = self.wave1.points();
-            let points2 = self.wave2.points();
-            let points3 = self.wave3.points();
-            for i in 0..SAMPLE_LENGTH {
-                points[i] = Pos2::new(
-                    points[i].x + points2[i].x + points3[i].x,
-                    points[i].y + points2[i].y + points3[i].y,
-                );
-            }
-
-            WaveViewer::new(points, 3.0).ui(ui, frame);
-            ui.separator();
-
-            self.wave1.ui(ui, frame);
-            ui.separator();
-
-            self.wave2.ui(ui, frame);
-            ui.separator();
-
-            self.wave3.ui(ui, frame);
-            ui.separator();
+            WaveformDisplay::new(self.audio.read_audio().clone()).ui(ui, frame);
 
             ui.with_layout(egui::Layout::bottom_up(egui::Align::LEFT), |ui| {
                 powered_by_egui_and_eframe(ui);
