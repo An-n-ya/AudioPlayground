@@ -2,6 +2,7 @@
 
 mod app;
 mod wave;
+mod audio;
 pub use app::App;
 pub use wave::SinSignal;
 
