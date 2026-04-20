@@ -1,25 +1,30 @@
+use egui::{Pos2, frame};
+
+use crate::{
+    SinSignal,
+    wave::{self, SAMPLE_LENGTH, WaveViewer},
+};
+
 /// We derive Deserialize/Serialize so we can persist app state on shutdown.
 #[derive(serde::Deserialize, serde::Serialize)]
 #[serde(default)] // if we add new fields, give them default values when deserializing old state
-pub struct TemplateApp {
-    // Example stuff:
-    label: String,
-
-    #[serde(skip)] // This how you opt-out of serialization of a field
-    value: f32,
+pub struct App {
+    wave1: SinSignal,
+    wave2: SinSignal,
+    wave3: SinSignal,
 }
 
-impl Default for TemplateApp {
+impl Default for App {
     fn default() -> Self {
         Self {
-            // Example stuff:
-            label: "Hello World!".to_owned(),
-            value: 2.7,
+            wave1: Default::default(),
+            wave2: Default::default(),
+            wave3: Default::default(),
         }
     }
 }
 
-impl TemplateApp {
+impl App {
     /// Called once before the first frame.
     pub fn new(cc: &eframe::CreationContext<'_>) -> Self {
         // This is also where you can customize the look and feel of egui using
@@ -35,14 +40,14 @@ impl TemplateApp {
     }
 }
 
-impl eframe::App for TemplateApp {
+impl eframe::App for App {
     /// Called by the framework to save state before shutdown.
     fn save(&mut self, storage: &mut dyn eframe::Storage) {
         eframe::set_value(storage, eframe::APP_KEY, self);
     }
 
     /// Called each time the UI needs repainting, which may be many times per second.
-    fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
+    fn ui(&mut self, ui: &mut egui::Ui, frame: &mut eframe::Frame) {
         // Put your widgets into a `SidePanel`, `TopBottomPanel`, `CentralPanel`, `Window` or `Area`.
         // For inspiration and more examples, go to https://emilk.github.io/egui
 
@@ -67,24 +72,33 @@ impl eframe::App for TemplateApp {
 
         egui::CentralPanel::default().show_inside(ui, |ui| {
             // The central panel the region left after adding TopPanel's and SidePanel's
-            ui.heading("eframe template");
+            ui.heading("sin wave drawing");
 
             ui.horizontal(|ui| {
                 ui.label("Write something: ");
-                ui.text_edit_singleline(&mut self.label);
             });
 
-            ui.add(egui::Slider::new(&mut self.value, 0.0..=10.0).text("value"));
-            if ui.button("Increment").clicked() {
-                self.value += 1.0;
+            let mut points = self.wave1.points();
+            let points2 = self.wave2.points();
+            let points3 = self.wave3.points();
+            for i in 0..SAMPLE_LENGTH {
+                points[i] = Pos2::new(
+                    points[i].x + points2[i].x + points3[i].x,
+                    points[i].y + points2[i].y + points3[i].y,
+                );
             }
 
+            WaveViewer::new(points, 3.0).ui(ui, frame);
             ui.separator();
 
-            ui.add(egui::github_link_file!(
-                "https://github.com/emilk/eframe_template/blob/main/",
-                "Source code."
-            ));
+            self.wave1.ui(ui, frame);
+            ui.separator();
+
+            self.wave2.ui(ui, frame);
+            ui.separator();
+
+            self.wave3.ui(ui, frame);
+            ui.separator();
 
             ui.with_layout(egui::Layout::bottom_up(egui::Align::LEFT), |ui| {
                 powered_by_egui_and_eframe(ui);
