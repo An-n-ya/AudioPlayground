@@ -4,6 +4,7 @@ mod app;
 mod wave;
 mod audio;
 mod waveform_display;
+mod analyze;
 pub use app::App;
-pub use wave::SinSignal;
+pub use wave::Signal;
 

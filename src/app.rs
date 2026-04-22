@@ -2,7 +2,7 @@ use egui::{Pos2, frame};
 use symphonia::core::audio::AudioBuffer;
 
 use crate::{
-    SinSignal,
+    Signal,
     wave::{self, SAMPLE_LENGTH, WaveViewer}, waveform_display::{AudioHandle, WaveformDisplay},
 };
 
@@ -10,9 +10,9 @@ use crate::{
 #[derive(serde::Deserialize, serde::Serialize)]
 #[serde(default)] // if we add new fields, give them default values when deserializing old state
 pub struct App {
-    wave1: SinSignal,
-    wave2: SinSignal,
-    wave3: SinSignal,
+    wave1: Signal,
+    wave2: Signal,
+    wave3: Signal,
     audio: AudioHandle
 }
 

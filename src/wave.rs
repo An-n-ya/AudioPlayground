@@ -4,18 +4,21 @@ use std::f64::consts::TAU;
 use egui::ecolor::Color32;
 use egui::{Pos2, Rect, emath, epaint, frame, pos2, vec2};
 
-pub const SAMPLE_LENGTH: usize = 300;
+pub const SAMPLE_LENGTH: usize = 50;
 
-#[derive(serde::Deserialize, serde::Serialize)]
-pub struct SinSignal {
+#[derive(serde::Deserialize, serde::Serialize, Debug)]
+pub struct Signal {
     freq: f64,
     amp: f64,
     phase: f64,
 }
 
-impl SinSignal {
+impl Signal {
+    pub fn new(freq: f64, amp: f64, phase: f64) -> Self {
+        Self {freq, amp, phase}
+    }
     pub fn points(&self) -> Vec<Pos2> {
-        (0..=SAMPLE_LENGTH)
+        (0..SAMPLE_LENGTH)
             .map(|i| {
                 let t = i as f64 / (SAMPLE_LENGTH as f64);
                 let y = self.amp * (t * self.freq * std::f64::consts::TAU + self.phase).sin();
@@ -25,7 +28,7 @@ impl SinSignal {
     }
 }
 
-impl Default for SinSignal {
+impl Default for Signal {
     fn default() -> Self {
         Self {
             freq: 1.0,
@@ -69,7 +72,7 @@ impl eframe::App for WaveViewer {
     }
 }
 
-impl eframe::App for SinSignal {
+impl eframe::App for Signal {
     fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
         ui.horizontal(|ui| {
             ui.vertical(|ui| {
