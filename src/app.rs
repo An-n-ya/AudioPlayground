@@ -2,8 +2,7 @@ use egui::{Pos2, frame};
 use symphonia::core::audio::AudioBuffer;
 
 use crate::{
-    Signal,
-    wave::{self, SAMPLE_LENGTH, WaveViewer}, waveform_display::{AudioHandle, WaveformDisplay},
+    Signal, analyze::dft::dft, spectrum_display::SpectrumDisplay, wave::{self, SAMPLE_LENGTH, WaveViewer}, waveform_display::{AudioHandle, WaveformDisplay}
 };
 
 /// We derive Deserialize/Serialize so we can persist app state on shutdown.
@@ -13,7 +12,9 @@ pub struct App {
     wave1: Signal,
     wave2: Signal,
     wave3: Signal,
-    audio: AudioHandle
+    audio: AudioHandle,
+    wd: Option<WaveformDisplay>,
+    specd: Option<SpectrumDisplay>,
 }
 
 impl Default for App {
@@ -22,7 +23,9 @@ impl Default for App {
             wave1: Default::default(),
             wave2: Default::default(),
             wave3: Default::default(),
-            audio: AudioHandle::new("assets/qwen_tts_output.wav".into())
+            audio: AudioHandle::new("assets/qwen_tts_output.wav".into()),
+            wd: None,
+            specd: None
         }
     }
 }
@@ -104,7 +107,19 @@ impl eframe::App for App {
             // ui.separator();
             //
 
-            WaveformDisplay::new(self.audio.read_audio().clone()).ui(ui, frame);
+            if self.wd.is_none() {
+                let audio_data = self.audio.read_audio();
+                self.wd = Some(WaveformDisplay::new(audio_data.clone()));
+                let data: Vec<_> = audio_data.iter().map(|p| p.y).collect();
+                self.specd = Some(SpectrumDisplay::new(dft(&data, 44100)))
+            }
+
+            if let Some(display) = &mut self.wd {
+                display.ui(ui, frame);
+            }
+            if let Some(display) = &mut self.specd {
+                display.ui(ui, frame);
+            }
 
             ui.with_layout(egui::Layout::bottom_up(egui::Align::LEFT), |ui| {
                 powered_by_egui_and_eframe(ui);
