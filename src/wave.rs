@@ -4,7 +4,7 @@ use std::f64::consts::TAU;
 use egui::ecolor::Color32;
 use egui::{Pos2, Rect, emath, epaint, frame, pos2, vec2};
 
-pub const SAMPLE_LENGTH: usize = 50;
+pub const SAMPLE_LENGTH: usize = 100;
 
 #[derive(serde::Deserialize, serde::Serialize, Debug)]
 pub struct Signal {
