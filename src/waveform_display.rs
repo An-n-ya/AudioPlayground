@@ -17,7 +17,7 @@ impl AudioHandle {
     }
     pub fn read_audio(&mut self) -> &Vec<Pos2> {
         if self.waveform.is_none() {
-            let points = audio("assets/qwen_tts_output.wav").unwrap();
+            let points = audio(&self.file_name).unwrap();
             let mut ret = Vec::with_capacity(points.len());
             for (i, y) in points.iter().enumerate() {
                 let t = i as f32 / points.len() as f32;
@@ -58,7 +58,7 @@ impl eframe::App for WaveformDisplay {
                 // ));
                 shapes.push(epaint::Shape::LineSegment {
                     points: [to_screen * Pos2::new(p.x, -p.y), to_screen * p.clone()],
-                    stroke: Stroke::new(0.1, Color32::LIGHT_BLUE),
+                    stroke: Stroke::new(0.3, Color32::LIGHT_BLUE),
                 });
             }
 

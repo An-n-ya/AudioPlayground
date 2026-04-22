@@ -1,18 +1,18 @@
-use std::f64::consts::TAU;
+use std::f32::consts::TAU;
 
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 
 use crate::{Signal, analyze::Vec2};
 
-pub fn dft(samples: &[f64], sample_rate: usize) -> Vec<Signal> {
+pub fn dft(samples: &[f32], sample_rate: usize) -> Vec<Signal> {
     let freq_count = samples.len() / 2 + 1;
-    let sample_size: f64 = samples.len() as f64;
-    let freq_step = sample_rate as f64 / sample_size;
-    let spectrum = (0..freq_count).into_par_iter()
+    let sample_size: f32 = samples.len() as f32;
+    let freq_step = sample_rate as f32 / sample_size;
+    let spectrum: Vec<Signal> = (0..freq_count).into_par_iter()
         .map(|freq_index: usize | {
         let mut sample_sum = Vec2::default();
         for (i, sample) in samples.iter().enumerate() {
-            let angle = i as f64 / sample_size * TAU * (freq_index as f64);
+            let angle = i as f32 / sample_size * TAU * (freq_index as f32);
             let point = Vec2::new(angle.cos(), angle.sin());
             sample_sum += point * (*sample);
         }
@@ -23,7 +23,7 @@ pub fn dft(samples: &[f64], sample_rate: usize) -> Vec<Signal> {
         let is_nyquist_freq = freq_index == freq_count - 1 && samples.len() % 2 == 0;
         let amp_scale = if is_0 || is_nyquist_freq { 1. } else { 2. };
         let amp = center.magnitude() * amp_scale;
-        let freq = freq_index as f64 * freq_step;
+        let freq = freq_index as f32 * freq_step;
         Signal::new(freq, amp, center.phase())
     }).collect();
 
@@ -45,10 +45,12 @@ mod tests {
             .points()
             .iter()
             .zip(signal2.points().iter())
-            .map(|(pos1, pos2)| pos1.y as f64 + pos2.y as f64)
+            .map(|(pos1, pos2)| pos1.y + pos2.y)
             .collect();
     
-        let res = dft(&samples, SAMPLE_LENGTH);
+        let res = time_it!("dft", {
+            dft(&samples, SAMPLE_LENGTH)
+        });
 
 
         for s in res.iter() {

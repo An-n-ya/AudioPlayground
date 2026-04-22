@@ -1,5 +1,5 @@
-use core::f64;
-use std::f64::consts::TAU;
+use core::f32;
+use std::f32::consts::TAU;
 
 use egui::ecolor::Color32;
 use egui::{Pos2, Rect, emath, epaint, frame, pos2, vec2};
@@ -8,24 +8,27 @@ pub const SAMPLE_LENGTH: usize = 100;
 
 #[derive(serde::Deserialize, serde::Serialize, Debug)]
 pub struct Signal {
-    freq: f64,
-    amp: f64,
-    phase: f64,
+    freq: f32,
+    amp: f32,
+    phase: f32,
 }
 
 impl Signal {
-    pub fn new(freq: f64, amp: f64, phase: f64) -> Self {
+    pub fn new(freq: f32, amp: f32, phase: f32) -> Self {
         Self {freq, amp, phase}
     }
     pub fn points(&self) -> Vec<Pos2> {
         (0..SAMPLE_LENGTH)
             .map(|i| {
-                let t = i as f64 / (SAMPLE_LENGTH as f64);
-                let y = self.amp * (t * self.freq * std::f64::consts::TAU + self.phase).sin();
+                let t = i as f32 / (SAMPLE_LENGTH as f32);
+                let y = self.amp * (t * self.freq * std::f32::consts::TAU + self.phase).sin();
                 pos2(t as f32, y as f32)
             })
             .collect()
     }
+    pub fn freq(&self) -> f32 {self.freq}
+    pub fn amp(&self) -> f32 {self.amp}
+    pub fn phase(&self) -> f32 {self.phase}
 }
 
 impl Default for Signal {
